@@ -70,6 +70,12 @@ describe("classifyBuildEvents", () => {
       error: expect.stringContaining("without reporting"),
     });
   });
+
+  it("keeps waiting when the session parks before its first turn starts", () => {
+    expect(classifyBuildEvents([{ type: "session.started" }, { type: "session.waiting" }])).toEqual({
+      state: "running",
+    });
+  });
 });
 
 describe("source bundles", () => {

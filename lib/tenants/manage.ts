@@ -3,21 +3,28 @@ import { z } from "zod";
 import { MODEL_ID_PATTERN } from "../agent/job";
 import type { Services } from "../services";
 import { objectKeys } from "../storage/object-store";
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_INSTRUCTIONS_LENGTH,
+  MAX_NAME_LENGTH,
+  MIN_DESCRIPTION_LENGTH,
+} from "./limits";
 import { planProgress, type Tenant } from "./model";
 import { domainFor, projectNameFor } from "./naming";
 import { SubdomainTakenError } from "./repository";
 import { generatePassword, generateSessionSecret } from "./secrets";
 import { toSubdomain } from "./subdomain";
 
-export const MAX_DESCRIPTION_LENGTH = 4000;
-export const MAX_INSTRUCTIONS_LENGTH = 4000;
-
 export const createTenantSchema = z.object({
-  name: z.string().trim().min(1, "Give the site a name.").max(80, "Keep the name under 80 characters."),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Give the site a name.")
+    .max(MAX_NAME_LENGTH, `Keep the name under ${MAX_NAME_LENGTH} characters.`),
   description: z
     .string()
     .trim()
-    .min(20, "Describe the site in at least a sentence.")
+    .min(MIN_DESCRIPTION_LENGTH, "Describe the site in at least a sentence.")
     .max(MAX_DESCRIPTION_LENGTH, `Keep the description under ${MAX_DESCRIPTION_LENGTH} characters.`),
   email: z.email("Enter the lead's email address.").trim().toLowerCase().max(254),
   model: z.string().regex(MODEL_ID_PATTERN, "Pick a model from the list."),

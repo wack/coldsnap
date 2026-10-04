@@ -216,6 +216,20 @@ describe("tenant pipeline", () => {
     await expect(runPipeline(services, tenant.id, "create")).rejects.toThrow(/simulated failure/);
   });
 
+  it("does not start a second agent run when the start step is retried", async () => {
+    const tenant = await createSampleTenant();
+    const { buildId } = await ops.beginOperation(services, tenant.id, "create", tenant.model);
+    await ops.provisionProject(services, tenant.id);
+    const first = await ops.startBuild(services, tenant.id, { buildId, instructions: null });
+    const retried = await ops.startBuild(services, tenant.id, { buildId, instructions: null });
+    expect(retried).toEqual(first);
+
+    // A new operation starts a new run.
+    const next = await ops.beginOperation(services, tenant.id, "create", tenant.model);
+    const fresh = await ops.startBuild(services, tenant.id, { buildId: next.buildId, instructions: null });
+    expect(fresh.sessionId).not.toBe(first.sessionId);
+  });
+
   it("refuses to deploy when the agent saved nothing", async () => {
     const tenant = await createSampleTenant();
     await ops.beginOperation(services, tenant.id, "create", tenant.model);

@@ -58,6 +58,7 @@ export async function beginOperation(
     model,
     lastError: null,
     activity: null,
+    agentSessionId: null,
   });
   return { buildId: crypto.randomUUID() };
 }
@@ -100,12 +101,17 @@ export async function startBuild(
   input: { readonly buildId: string; readonly instructions: string | null },
 ): Promise<{ sessionId: string; outputPathname: string }> {
   let tenant = await services.tenants.require(tenantId);
+  const outputPathname = objectKeys.source(tenantId, input.buildId);
+  // beginOperation clears the session id, so one present now was started by
+  // an earlier attempt of this step. Reuse it instead of starting a second
+  // agent run for the same build.
+  if (tenant.agentSessionId) return { sessionId: tenant.agentSessionId, outputPathname };
+
   tenant = await setStep(services, tenant, "generate", {
     state: "running",
     detail: "Starting the eve agent",
   });
 
-  const outputPathname = objectKeys.source(tenantId, input.buildId);
   const job: SiteBuildJob = siteBuildJobSchema.parse({
     version: 1,
     buildId: input.buildId,

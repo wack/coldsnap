@@ -21,10 +21,16 @@ const TOOL_ACTIVITY: Record<string, string> = {
  */
 export function classifyBuildEvents(events: readonly BuildStreamEvent[]): SiteBuildStatus {
   let detail: string | undefined;
+  // A session can park before its first turn starts; only a park after the
+  // turn began means the turn ended.
+  let turnStarted = false;
 
   for (const event of events) {
     const data = (event.data ?? {}) as Record<string, unknown>;
     switch (event.type) {
+      case "turn.started":
+        turnStarted = true;
+        break;
       case "actions.requested": {
         const described = describeActions(data.actions);
         if (described) detail = described;
@@ -50,6 +56,10 @@ export function classifyBuildEvents(events: readonly BuildStreamEvent[]): SiteBu
       case "turn.cancelled":
         return { state: "failed", error: "The agent's turn was cancelled." };
       case "session.waiting":
+        if (turnStarted) {
+          return { state: "failed", error: "The agent finished without reporting a result." };
+        }
+        break;
       case "session.completed":
         return { state: "failed", error: "The agent finished without reporting a result." };
       default:

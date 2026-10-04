@@ -1,0 +1,162 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Coldsnap: pixel-art cyberpunk.
+ * Night-indigo surfaces, neon magenta for actions, neon cyan for focus and
+ * information, square corners everywhere, and hard 1-bit shadows instead of
+ * blur. Pixel display type for headings; a readable pixel face for body text.
+ */
+:root {
+  --radius: 0px;
+  --background: #0a0318;
+  --foreground: #ece8ff;
+  --card: #120728;
+  --card-foreground: #ece8ff;
+  --popover: #160a31;
+  --popover-foreground: #ece8ff;
+  --primary: #ff2a6d;
+  --primary-foreground: #12021c;
+  --secondary: #1f0f42;
+  --secondary-foreground: #ece8ff;
+  --muted: #1a0c38;
+  --muted-foreground: #a197d0;
+  --accent: #05d9e8;
+  --accent-foreground: #04121a;
+  --destructive: #ff4d5e;
+  --success: #3dff8b;
+  --warning: #ffd319;
+  --border: #3d2275;
+  --input: #3d2275;
+  --ring: #05d9e8;
+  --shadow-ink: #000000;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --font-sans: var(--font-body), ui-monospace, monospace;
+  --font-pixel: var(--font-display), ui-monospace, monospace;
+  --font-mono: var(--font-terminal), ui-monospace, monospace;
+  --shadow-pixel: 4px 4px 0 0 var(--shadow-ink);
+  --shadow-pixel-sm: 2px 2px 0 0 var(--shadow-ink);
+  --shadow-neon: 0 0 0 2px var(--primary), 6px 6px 0 0 var(--shadow-ink);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/60;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    min-height: 100dvh;
+    /* Synthwave night: a faint pixel grid over two soft neon horizons. */
+    background-image:
+      linear-gradient(transparent 0 calc(100% - 1px), rgb(61 34 117 / 0.35) 0),
+      linear-gradient(90deg, transparent 0 calc(100% - 1px), rgb(61 34 117 / 0.35) 0),
+      radial-gradient(60rem 30rem at 85% -10%, rgb(255 42 109 / 0.16), transparent 70%),
+      radial-gradient(50rem 28rem at 0% 110%, rgb(5 217 232 / 0.12), transparent 70%);
+    background-size: 32px 32px, 32px 32px, auto, auto;
+    background-attachment: fixed;
+  }
+  /* CRT scanlines. Decorative only; never intercepts input. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgb(0 0 0 / 0) 0,
+      rgb(0 0 0 / 0) 2px,
+      rgb(0 0 0 / 0.18) 3px
+    );
+  }
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Square-stepped corners: the 8-bit stand-in for a border radius. */
+  .pixel-corners {
+    clip-path: polygon(
+      0 6px, 6px 6px, 6px 0,
+      calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px,
+      100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%,
+      6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px)
+    );
+  }
+  .neon-text {
+    text-shadow:
+      0 0 1px currentColor,
+      0 0 12px color-mix(in srgb, currentColor 55%, transparent);
+  }
+  .pixelated {
+    image-rendering: pixelated;
+  }
+  .blink {
+    animation: blink 1s steps(2, start) infinite;
+  }
+  .march {
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--accent) 0 8px,
+      transparent 8px 12px
+    );
+    background-size: 24px 100%;
+    animation: march 0.6s steps(3) infinite;
+  }
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+@keyframes march {
+  to {
+    background-position: 24px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blink,
+  .march {
+    animation: none;
+  }
+}

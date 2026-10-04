@@ -1,3 +1,5 @@
+import "@testing-library/jest-dom/vitest";
+
 // Every test runs against the in-memory doubles and an in-memory PGlite
 // database; nothing reaches Vercel, Blob, the AI Gateway, or a browser.
 process.env.COLDSNAP_DRIVERS = "memory";
