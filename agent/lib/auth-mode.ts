@@ -30,9 +30,9 @@ const INFERENCE_PROVIDER = "digitalocean";
  * environment, though, so it cannot express the model or the request-shaping
  * variables a non-Anthropic model needs. This interface composes it with those.
  */
-export interface ChoreAuthMode {
+export interface ColdsnapAuthMode {
   /** Identifies the mode in logs, since nobody watches a cron job run. */
-  readonly name: ChoreAuthModeName;
+  readonly name: ColdsnapAuthModeName;
   /** Credentials, handed to `createClaudeCode({ auth })`. */
   readonly auth: ClaudeCodeAuthenticationMode;
   /** Extra Claude Code environment variables for this route. */
@@ -41,12 +41,12 @@ export interface ChoreAuthMode {
   readonly model: string;
 }
 
-export type ChoreAuthModeName = (typeof MODE_NAMES)[number];
+export type ColdsnapAuthModeName = (typeof MODE_NAMES)[number];
 
 const MODE_NAMES = ["gateway-credits", "subscription"] as const;
 
-/** Selected when `CHORE_AUTH_MODE` is unset. */
-const DEFAULT_MODE: ChoreAuthModeName = "gateway-credits";
+/** Selected when `COLDSNAP_AUTH_MODE` is unset. */
+const DEFAULT_MODE: ColdsnapAuthModeName = "gateway-credits";
 
 /**
  * Pays with AI Gateway credits, running GLM 5.3 Flash on DigitalOcean.
@@ -57,7 +57,7 @@ const DEFAULT_MODE: ChoreAuthModeName = "gateway-credits";
  * gateway variables and drops `CLAUDE_CODE_OAUTH_TOKEN`, which is correct here
  * and exactly wrong for `subscription` mode below.
  */
-function gatewayCredits({ gatewayKey }: { gatewayKey: string }): ChoreAuthMode {
+function gatewayCredits({ gatewayKey }: { gatewayKey: string }): ColdsnapAuthMode {
   return {
     name: "gateway-credits",
     auth: {
@@ -100,7 +100,7 @@ function subscription({
 }: {
   gatewayKey: string;
   oauthToken: string;
-}): ChoreAuthMode {
+}): ColdsnapAuthMode {
   return {
     name: "subscription",
     auth: {
@@ -115,7 +115,7 @@ function subscription({
 }
 
 const MISSING_OAUTH_TOKEN =
-  "CHORE_AUTH_MODE=subscription needs CLAUDE_CODE_OAUTH_TOKEN. Generate one " +
+  "COLDSNAP_AUTH_MODE=subscription needs CLAUDE_CODE_OAUTH_TOKEN. Generate one " +
   "with `claude setup-token` and store it in the Vercel project environment.";
 
 /**
@@ -127,15 +127,15 @@ const MISSING_OAUTH_TOKEN =
  * transform then narrows on the same discriminant to build the concrete
  * implementor, which is the only thing callers ever see.
  */
-const choreAuthModeSchema = z
-  .discriminatedUnion("CHORE_AUTH_MODE", [
+const coldsnapAuthModeSchema = z
+  .discriminatedUnion("COLDSNAP_AUTH_MODE", [
     z.object({
-      CHORE_AUTH_MODE: z.literal("gateway-credits"),
+      COLDSNAP_AUTH_MODE: z.literal("gateway-credits"),
       AI_GATEWAY_API_KEY: z.string().min(1).optional(),
       VERCEL_OIDC_TOKEN: z.string().min(1).optional(),
     }),
     z.object({
-      CHORE_AUTH_MODE: z.literal("subscription"),
+      COLDSNAP_AUTH_MODE: z.literal("subscription"),
       AI_GATEWAY_API_KEY: z.string().min(1).optional(),
       VERCEL_OIDC_TOKEN: z.string().min(1).optional(),
       /*
@@ -148,7 +148,7 @@ const choreAuthModeSchema = z
         .min(1, MISSING_OAUTH_TOKEN),
     }),
   ])
-  .transform((env, ctx): ChoreAuthMode => {
+  .transform((env, ctx): ColdsnapAuthMode => {
     /*
      * Both modes authenticate the gateway hop, so this requirement is shared
      * rather than per-branch. OIDC is the deployed fallback: Vercel injects it
@@ -165,7 +165,7 @@ const choreAuthModeSchema = z
       return z.NEVER;
     }
 
-    return env.CHORE_AUTH_MODE === "subscription"
+    return env.COLDSNAP_AUTH_MODE === "subscription"
       ? subscription({ gatewayKey, oauthToken: env.CLAUDE_CODE_OAUTH_TOKEN })
       : gatewayCredits({ gatewayKey });
   });
@@ -176,12 +176,12 @@ const choreAuthModeSchema = z
  * Read per run rather than at module scope: eve evaluates authored modules at
  * build time, where none of these credentials exist.
  */
-export function resolveChoreAuthMode(
+export function resolveColdsnapAuthMode(
   env: NodeJS.ProcessEnv = process.env,
-): ChoreAuthMode {
-  const parsed = choreAuthModeSchema.safeParse({
+): ColdsnapAuthMode {
+  const parsed = coldsnapAuthModeSchema.safeParse({
     ...env,
-    CHORE_AUTH_MODE: env.CHORE_AUTH_MODE ?? DEFAULT_MODE,
+    COLDSNAP_AUTH_MODE: env.COLDSNAP_AUTH_MODE ?? DEFAULT_MODE,
   });
 
   if (!parsed.success) {
@@ -191,7 +191,7 @@ export function resolveChoreAuthMode(
      */
     throw new Error(
       `Invalid chore authentication configuration ` +
-        `(CHORE_AUTH_MODE must be one of ${MODE_NAMES.join(", ")}):\n` +
+        `(COLDSNAP_AUTH_MODE must be one of ${MODE_NAMES.join(", ")}):\n` +
         z.prettifyError(parsed.error),
     );
   }

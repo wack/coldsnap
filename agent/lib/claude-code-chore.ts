@@ -3,7 +3,7 @@ import { createClaudeCode } from "@ai-sdk/harness-claude-code";
 import { createVercelNetworkSandboxSession } from "@ai-sdk/sandbox-vercel";
 import { getToken } from "@vercel/connect";
 
-import { resolveChoreAuthMode } from "./auth-mode";
+import { resolveColdsnapAuthMode } from "./auth-mode";
 import { rustToolchainChore } from "./rust-toolchain-chore";
 
 /** Vercel Connect connector UID (`vercel connect create github`). */
@@ -87,11 +87,11 @@ cargo make --version
  * credentials are absent.
  *
  * Every difference between paying with Gateway credits and paying with the
- * Claude subscription lives behind `ChoreAuthMode`, selected by
- * `CHORE_AUTH_MODE`. Nothing here branches on which route is active.
+ * Claude subscription lives behind `ColdsnapAuthMode`, selected by
+ * `COLDSNAP_AUTH_MODE`. Nothing here branches on which route is active.
  */
 function createChoreAgent() {
-  const authMode = resolveChoreAuthMode();
+  const authMode = resolveColdsnapAuthMode();
 
   return new HarnessAgent({
     harness: createClaudeCode({
