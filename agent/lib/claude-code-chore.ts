@@ -7,7 +7,7 @@ import { resolveChoreAuthMode } from "./auth-mode";
 import { rustToolchainChore } from "./rust-toolchain-chore";
 
 /** Vercel Connect connector UID (`vercel connect create github`). */
-const GITHUB_CONNECTOR = "github/wack-chores";
+const GITHUB_CONNECTOR = "github/wack-coldsnap";
 /** Every chore repository lives in this org. */
 const GITHUB_ORG = "wack";
 /** Port the Claude Code bridge binds inside the sandbox. */
@@ -163,8 +163,8 @@ export async function runRustToolchainChore(repository: string): Promise<string>
         `printf '%s\\n' "https://x-access-token:${token}@github.com" > "$HOME/.git-credentials"`,
         `chmod 600 "$HOME/.git-credentials"`,
         `git config --global credential.helper store`,
-        `git config --global user.name "wack chores"`,
-        `git config --global user.email "chores@wack.run"`,
+        `git config --global user.name "wack coldsnap"`,
+        `git config --global user.email "coldsnap@wack.run"`,
         `rm -rf ${WORK_DIR}`,
         `git clone --depth 50 "https://github.com/${repository}.git" ${WORK_DIR}`,
       ].join("\n"),

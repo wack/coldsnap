@@ -1,4 +1,6 @@
-# chores
+# coldsnap
+
+Coldsnap is a lead magnet management platform. It creates custom lead magnets for leads who are considering buying videography services from a freelance videography company.
 
 This is an [eve](https://eve.dev) agent bootstrapped with [`eve init`](https://eve.dev/docs/reference/cli#eve-init).
 
