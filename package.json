@@ -1,0 +1,35 @@
+{
+  "name": "chores",
+  "version": "0.0.0",
+  "type": "module",
+  "imports": {
+    "#*": "./agent/*",
+    "#evals/*": "./evals/*"
+  },
+  "scripts": {
+    "build": "eve build",
+    "deploy": "eve deploy",
+    "dev": "eve dev",
+    "eval": "eve eval",
+    "postinstall": "node scripts/patch-eve-cjs-require.mjs",
+    "start": "eve start",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@ai-sdk/harness": "^1.0.126",
+    "@ai-sdk/harness-claude-code": "^1.0.130",
+    "@ai-sdk/sandbox-vercel": "^1.0.126",
+    "@vercel/connect": "2.2.0",
+    "ai": "^7.0.105",
+    "eve": "^0.67.1",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "24.x",
+    "typescript": "7.0.2",
+    "vercel": "^60.1.3"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}
