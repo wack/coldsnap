@@ -79,6 +79,13 @@ nested subdomains of Coldsnap's own `*.vercel.app` hostname are not possible.
 ## Set up a deployment
 
 1. **Project.** Create the Vercel project for this repository (`vercel link`).
+   This is a Next.js project that mounts the agent through `withEve` in
+   `next.config.ts`, so it builds with the **Next.js** preset. Vercel
+   suggests the eve preset on import because `eve` is a dependency; that
+   preset expects a standalone agent's `.output` directory and fails.
+   `vercel.json` pins the Next.js preset, build command, and output
+   directory, overriding the dashboard. During the build, `withEve` adds the
+   agent as a separate `eve` service routed at `/eve/v1/*`.
    Use a plan with Fluid compute: the Codex build step runs for several
    minutes inside one function invocation, so the 800-second maximum
    duration bounds it (see `COLDSNAP_CODEX_TIMEOUT_MS` in
@@ -95,9 +102,10 @@ nested subdomains of Coldsnap's own `*.vercel.app` hostname are not possible.
    `COLDSNAP_ADMIN_ALLOWLIST` (Frank's Vercel username or user id).
 5. **Root domain (optional).** Add a domain to the team with wildcard DNS
    pointed at Vercel, and set `COLDSNAP_ROOT_DOMAIN`.
-6. **Deploy** with `vercel deploy --prod` (or `eve deploy`). `withEve` deploys
-   the agent as a service in the same project; AI Gateway and Vercel Sandbox
-   authenticate with the project's OIDC token.
+6. **Deploy** with `vercel deploy --prod` (or `eve deploy`). AI Gateway and
+   Vercel Sandbox authenticate with the project's OIDC token, which must stay
+   enabled: the agent's service build prepares a Vercel Sandbox template and
+   fails without it.
 
 `.env.example` lists every variable with a note on each.
 
