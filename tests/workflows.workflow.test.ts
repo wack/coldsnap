@@ -22,7 +22,11 @@ async function driveToCompletion(run: Run<unknown>, tenantId: string) {
       return { status, timeline };
     }
     try {
-      const sleepId = await waitForSleep(run, { timeout: 3_000, pollInterval: 20 });
+      // @workflow/vitest carries its own copy of the runtime types.
+      const sleepId = await waitForSleep(run as unknown as Parameters<typeof waitForSleep>[0], {
+        timeout: 3_000,
+        pollInterval: 20,
+      });
       const tenant = await getServices().tenants.get(tenantId);
       const running = tenant?.progress?.steps.find((step) => step.state === "running");
       if (running) timeline.push(`${running.id}: ${running.detail ?? ""}`);

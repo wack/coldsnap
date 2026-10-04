@@ -18,6 +18,34 @@ export const MODEL_ATTRIBUTE = "coldsnap:model";
 /** Gateway model ids look like `provider/model-name`. */
 export const MODEL_ID_PATTERN = /^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9._-]*$/;
 
+/** Job pathnames are written by Coldsnap: `jobs/<tenant id>/<build id>.json`. */
+export const JOB_PATHNAME_PATTERN = /^jobs\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.json$/;
+
+type AuthAttributes = Readonly<Record<string, string | readonly string[]>>;
+
+/**
+ * Copies the job and model headers of an authenticated eve request into the
+ * session's auth attributes. Values that do not match the expected shapes are
+ * dropped rather than trusted.
+ */
+export function withJobAttributes<T extends { readonly attributes: AuthAttributes }>(
+  auth: T,
+  headers: Headers,
+): T {
+  const attributes: Record<string, string | readonly string[]> = { ...auth.attributes };
+  const job = headers.get(JOB_HEADER);
+  const model = headers.get(MODEL_HEADER);
+  if (job && JOB_PATHNAME_PATTERN.test(job)) attributes[JOB_ATTRIBUTE] = job;
+  if (model && MODEL_ID_PATTERN.test(model)) attributes[MODEL_ATTRIBUTE] = model;
+  return { ...auth, attributes };
+}
+
+/** The model a session runs on: Frank's pick when present, else the default. */
+export function resolveSessionModel(attributes: AuthAttributes | undefined, fallback: string): string {
+  const requested = attributes?.[MODEL_ATTRIBUTE];
+  return typeof requested === "string" && MODEL_ID_PATTERN.test(requested) ? requested : fallback;
+}
+
 export const siteBuildJobSchema = z.object({
   version: z.literal(1),
   buildId: z.string().min(1),
